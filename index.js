@@ -29,6 +29,9 @@ async function run() {
    
     const database = client.db("bookItem");
     const itemCollection = database.collection("Items");
+
+// jwt emplement 
+
         
     app.post('/items', async(req, res) =>{
         const newItem = req.body
@@ -36,11 +39,15 @@ async function run() {
         const result = await itemCollection.insertOne(newItem)
         res.send(result)
     })
-
+    
     app.get('/items', async(req, res) =>{
-        
+        const cursor = itemCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
     })
 
+
+    
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
