@@ -76,8 +76,6 @@ async function run() {
       res.send(result);
     });
 
-   
-
     app.get("/items/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -92,51 +90,38 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/books/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const book = await itemCollection.findOne(query);
-      res.send(book);
+ 
+
+    app.put("/borrowedBook/:id", async (req, res) => {
+      const borrowedBookId = req.params.id;
+      const updateBorrewdBook = await itemCollection.updateOne(
+        { _id: new ObjectId(borrowedBookId) }, // Filter criteria
+        { $inc: { quantity: -1 } }
+      );
+
+      console.log(updateBorrewdBook);
     });
 
-    app.get("/borrow/book/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { user_email: email };
-      const result = await bookCollection.find(query).toArray();
-      res.send(result);
-    });
 
-
-    app.post("/borrow", async (req, res) => {
+    app.post("/borrowed", async (req, res) => {
       const newItem = req.body;
+      console.log(newItem)
       const result = await bookCollection.insertOne(newItem);
       res.send(result);
+      
     });
 
-
-    //   app.post('/borrow/:id', async (req, res) => {
-    //     const itemId = req.params.id
-    //     const newItem = req.body;
-    //     const update = await itemCollection.updateOne(
-    //       { _id:  ObjectId(itemId) },
-    //       { $inc: { quantity: 1 } }
-    //   );
-
-    //     const result = await bookCollection.insertOne(newItem);
-    //     res.send(result, update);
-
-    // });
-
-    app.get("/borrow", async (req, res) => {
-      const cursor = bookCollection.find();
+    app.get("/getbrrowedbook/:email", async (req, res) => {
+      const email = req.params.email
+      const query = { user_email: email };
+      const cursor = await bookCollection.find(query);
       const result = await cursor.toArray();
-      res.send(result);
-      console.log("this is work")
+      res.send(result)
     });
+    
 
-
-
-
+   
+    
 
     // await client.db("admin").command({ ping: 1 });
     console.log(
