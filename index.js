@@ -37,58 +37,105 @@ async function run() {
     await client.connect();
     const database = client.db("bookItem");
     const itemCollection = database.collection("Items");
+    const bookCollection = database.collection("books");
 
-    // JWT implementation
-   //creating Token
-   app.post("/jwt",  async (req, res) => {
-    const user = req.body;
-    console.log("user for token", user);
-    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-  
-    res.cookie('token', token, {
-      httpOnly:true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production'?'none':'strict' 
-    })
-    .send({success:true})
-  });
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log("user for token", user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
 
-  app.get("/logout", async (req, res) => {
-       
+      res.cookie('token', token, {
+        httpOnly:true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production'?'none':'strict' 
+      })
+      .send({success:true})
+    });
+
+    app.get("/logout", async (req, res) => {
       res.clearCookie("token", {
-      httpOnly:true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production'?'none':'strict' ,
-       maxAge: 0 })
-      .send({ success: true });
-  });
+        httpOnly:true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production'?'none':'strict' ,
+        maxAge: 0 
+      }).send({ success: true });
+    });
 
     app.post('/items', async (req, res) => {
       
         const newItem = req.body;
         const result = await itemCollection.insertOne(newItem);
         res.send(result);
-    }
-    );
-
+            
+    });
+ 
+  
     app.get('/items', async (req, res) => {
-     
+    
         const cursor = itemCollection.find();
         const result = await cursor.toArray();
         res.send(result);
       
     });
+    app.post('/borrow', async (req, res) => {
+      
+      const newItem = req.body;
+      const result = await bookCollection.insertOne(newItem);
+      res.send(result);
+          
+  });
+    app.get('/borrow', async (req, res) => {
+    
+        const cursor = bookCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      
+    });
+    app.get('/borrow/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await bookCollection.find(query).toArray();
+      res.send(result);
+      
+    });
 
 
-    app.get('/items/:id', async(req, res)=>{
-      const id = req.params.id
-      const query = {_id : new ObjectId(id)}
-      const result = await itemCollection.findOne(query)
-      res.send(result)
-    })
+    app.get('/items/:id', async (req, res) => {
+     
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await itemCollection.findOne(query);
+        res.send(result);
+     
+    });
 
-    await client.db("admin").command({ ping: 1 });
+    app.get('/data/:category', async (req, res) => {
+        const category = req.params.category;
+        const query = { category: category };
+        const result = await itemCollection.find(query).toArray();
+        res.send(result);
+      
+    });
+
+
+    app.get('/books/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const book = await itemCollection.findOne(query);
+      res.send(book)
+    });
+
+    
+
+    
+  
+
+
+
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
   } finally {
     // await client.close();
   }
@@ -96,10 +143,11 @@ async function run() {
 
 run().catch(console.dir);
 
-app.get('/', async (req, res) => {
-  res.send('Start Book Haven Server');
-});
+app.get('/', async(req, res) =>{
+    res.send('Start Server ')
+})
 
-app.listen(port, () => {
-  console.log(`Server Running ${port}`);
-});
+app.listen(port, () =>{
+    console.log(`Server is Runnig ${port}` );
+    
+})
