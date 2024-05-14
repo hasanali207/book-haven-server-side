@@ -148,9 +148,8 @@ async function run() {
       const query = {_id : new ObjectId(id)}
      const data = {
         $set:{
-          photo: item.photo,
+          image: item.image,
           name: item.name,
-          user_email: item.user_email,
           // quantity: item.quantity,         
           rating: item.rating,
           description: item.description,
