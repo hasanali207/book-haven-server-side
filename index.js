@@ -90,38 +90,82 @@ async function run() {
       res.send(result);
     });
 
- 
-
     app.put("/borrowedBook/:id", async (req, res) => {
       const borrowedBookId = req.params.id;
       const updateBorrewdBook = await itemCollection.updateOne(
-        { _id: new ObjectId(borrowedBookId) }, // Filter criteria
+        { _id: new ObjectId(borrowedBookId) }, 
         { $inc: { quantity: -1 } }
       );
 
       console.log(updateBorrewdBook);
     });
 
+    app.put("/getreturn/:id", async (req, res) => {
+      const returnBookId = req.params.id;
+      
+       const updateBorrowedBook = await itemCollection.findOneAndUpdate(
+      { _id: new ObjectId(returnBookId) },
+      { $inc: { quantity: 1 } },
+      { returnOriginal: false } 
+    );
+      res.send(updateBorrowedBook);
+      console.log(updateBorrowedBook);
+    });
+
 
     app.post("/borrowed", async (req, res) => {
       const newItem = req.body;
-      console.log(newItem)
+      console.log(newItem);
       const result = await bookCollection.insertOne(newItem);
       res.send(result);
-      
     });
 
     app.get("/getbrrowedbook/:email", async (req, res) => {
-      const email = req.params.email
+      const email = req.params.email;
       const query = { user_email: email };
       const cursor = await bookCollection.find(query);
       const result = await cursor.toArray();
-      res.send(result)
+      res.send(result);
     });
-    
 
-   
-    
+    app.delete("/return/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookCollection.deleteOne(query);
+      res.send(result);
+    });
+
+     // update
+     app.get('/items/update/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id : new ObjectId(id)}
+      const result = await itemCollection.findOne(query)
+      res.send(result)
+    })
+     app.put('/updateItem/:id', async(req, res)=>{
+      const id = req.params.id
+      const item = req.body
+      const query = {_id : new ObjectId(id)}
+     const data = {
+        $set:{
+          photo: item.photo,
+          name: item.name,
+          user_email: item.user_email,
+          // quantity: item.quantity,         
+          rating: item.rating,
+          description: item.description,
+          category: item.category,
+          
+        } 
+      }
+      const result = await itemCollection.updateOne(query, data )
+      console.log(result);
+      res.send(result)
+      
+    })
+
+
+
 
     // await client.db("admin").command({ ping: 1 });
     console.log(
