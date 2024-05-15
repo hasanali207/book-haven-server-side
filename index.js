@@ -79,14 +79,14 @@ async function run() {
         .send({ success: true });
     });
 
-    app.post("/items", async (req, res) => {
+    app.post("/items",  async (req, res) => {
       const newItem = req.body;
       const result = await itemCollection.insertOne(newItem);
       res.send(result);
     });
 
 
-    app.get("/items",  async (req, res) => {
+    app.get("/items", verfyToken, async (req, res) => {
       const cursor = itemCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -173,7 +173,7 @@ async function run() {
         },
       };
       const result = await itemCollection.updateOne(query, data);
-      console.log(result);
+      
       res.send(result);
     });
 
