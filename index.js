@@ -86,7 +86,7 @@ async function run() {
     });
 
 
-    app.get("/items", verfyToken, async (req, res) => {
+    app.get("/items",  async (req, res) => {
       const cursor = itemCollection.find();
       const result = await cursor.toArray();
       res.send(result);
